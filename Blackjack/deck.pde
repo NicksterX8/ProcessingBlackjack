@@ -17,6 +17,7 @@ class Card {
    String rank; // like in CardRank
    int suit; // 0-3
 
+   // create a card e.g. Ace of Clubs like this: new Card("A", CLUB)
    Card(String _rank, int _suit) {
       rank = _rank;
       suit = _suit;
@@ -47,13 +48,13 @@ IntDict createRankValueDict(boolean aceLow) {
 }
 
 // rank values with ace == 1
-IntDict LowRankValues = createRankValueDict(true);
+IntDict HardRankValues = createRankValueDict(true);
 // rank values with ace == 11
 IntDict HighRankValues = createRankValueDict(false);
 
-// Gets the highest value a hand can be (using Aces as 11) with one exception,
+// Gets the highest value a hand can be (using Aces as 11) without it going over 21
 // if aces being 11 makes the hand go over 21, it treats them as 1s
-int getHighestHandValue(ArrayList<Card> hand) {
+int getHandValue(ArrayList<Card> hand) {
   int value = 0;
   int nAces = 0;
   for (int i = 0; i < hand.size(); i++) {
@@ -72,40 +73,55 @@ int getHighestHandValue(ArrayList<Card> hand) {
 }
 
 // Gets the lowest value a hand can be (using Aces as 1)
-int getLowestHandValue(ArrayList<Card> hand) {
+int getHardHandValue(ArrayList<Card> hand) {
   int value = 0;
   for (int i = 0; i < hand.size(); i++) {
     String rank = hand.get(i).rank;
-    value += LowRankValues.get(rank);
+    value += HardRankValues.get(rank);
   }
   return value;
 }
 
 // can hold any number of cards
 class Deck {
-  ArrayList<Card> cards;
+  ArrayList<Card> cards = new ArrayList<Card>();
   
   // Randomly shuffle in place all cards in the deck
   void shuffle() {
      Collections.shuffle(cards);
   } 
+  
+  // Deck must not be empty!
+  Card pop() {
+     assert(cards.size() > 0);
+     return cards.remove(cards.size()-1); 
+  }
+  
+  boolean isEmpty() {
+     return cards.size() == 0; 
+  }
 }
 
-// Creates a sorted deck starting at Ace of spades going to King of diamonds
-Deck createSortedDeck() {
+// Creates a number of sorted decks starting at Ace of spades going to King of diamonds
+// param numDuplicates: how many decks worth of cards to put in the deck.
+Deck createSortedDeck(int numDuplicates) {
+  assert(numDuplicates >= 0);
   Deck d = new Deck();
-  for (int suit = 0; suit < 4; suit++) {
-    for (int rankNumber = 0; rankNumber < CardRanks.length; rankNumber++) {
-      String rank = CardRanks[rankNumber];
-      Card c = new Card(rank, suit);
-      d.cards.add(c);
+  for (int i = 0; i < numDuplicates; i++) {
+    for (int suit = 0; suit < 4; suit++) {
+      for (int rankNumber = 0; rankNumber < CardRanks.length; rankNumber++) {
+        String rank = CardRanks[rankNumber];
+        Card c = new Card(rank, suit);
+        d.cards.add(c);
+      }
     }
   }
   return d;
 }
 
-Deck createShuffledDeck() {
-  Deck sorted = createSortedDeck();
+// param numDecksUsed: how many decks worth of cards are shuffled in. e.g. if numDeckUsed = 3, there are 3 of every card shuffled into this deck
+Deck createShuffledDeck(int numDecksUsed) {
+  Deck sorted = createSortedDeck(numDecksUsed);
   sorted.shuffle();
   return sorted; // now shuffled
 }
