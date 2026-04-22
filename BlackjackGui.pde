@@ -136,7 +136,7 @@ void drawBoard() {
   noFill();
   //Deck placeholder
   rect(int(width*0.7), int(height*0.27), int(width*0.15), int(height*0.15), int(width*0.0078125));
-  //dealers hand placeholder
+  //dealers hand placeholder I have made these smaller than the player placeholder to give options on size for the cards
   rect(int(width*0.54), int(height*0.3), int(width*0.07), int(height*0.2), int(width*0.0078125));
   rect(int(width*0.46), int(height*0.3), int(width*0.07), int(height*0.2), int(width*0.0078125));
   //players hand placeholder
