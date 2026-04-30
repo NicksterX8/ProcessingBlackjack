@@ -135,6 +135,7 @@ class Round {
        turn = (turn + 1) % players.size(); // increment turn number, wrapping back to 0 
       } while (!players.get(turn).active());
       currentPlayer = players.get(turn);
+      currPlayer = currentPlayer;
       print(currentPlayer.name + "'s turn.\n");
       while (!currentPlayer.currentHands.get(handNumber).active) {
          handNumber++;
@@ -160,6 +161,7 @@ class Round {
       int dealersTurn = players.size();
       if (turn == dealersTurn) {
         dealerHand.cards.add(card);
+        count.getRunningCount(card);
         print("The dealer drew a " + card.rank + " of " + SuitNames[card.suit] + "s.\n");
         if (dealerHand.isBlackjack()) {
            // round over, dealer beats anyone who does not have blackjack
@@ -180,6 +182,7 @@ class Round {
            return false;
         }
         hand.cards.add(card);
+        count.getRunningCount(card);
         print(currentPlayer.name + " was dealt a " + card.rank + " of " + SuitNames[card.suit] + "s.\n");
         
         // We need to check if incase someone was dealt blackjack, and mark their hand as over/not active
@@ -209,6 +212,7 @@ class Round {
       Card card = deck.pop();
       print("Drew " + card.rank + " of " + SuitNames[card.suit] + "s.\n");
       hand.cards.add(card);
+      count.getRunningCount(card);
       print("New hand value: " + hand.value() + "\n");
       if (hand.isBust()) {
          print("Bust!\n");

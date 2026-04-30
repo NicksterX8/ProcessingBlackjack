@@ -28,6 +28,7 @@ class CountDracula {
   void resetCount() {
     runningCount = 0;
   }
+}
       
   
   
