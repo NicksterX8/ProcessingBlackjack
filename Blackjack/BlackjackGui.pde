@@ -8,6 +8,8 @@
 
 color FELT        = #1B6B38;
 color FELT_DARK   = #145530;
+color BTN_START = #39F070;
+color BTN_ADD_FRIENDS = #F2975F;
 color BTN_HIT     = #39F070;
 color BTN_STAND   = #B83232;
 color BTN_DOUBLE  = #F2975F;
@@ -20,7 +22,8 @@ PFont f;
 Player currPlayer;
 int currBet = 1;
 int playerChips = 500;
-boolean isStarted = false;
+boolean started = false;
+
 boolean wasPressed = false; //boolean flag for button logic in draw()
 
 PImage cardBack;
@@ -34,6 +37,29 @@ String[] RANKS = {"ace","2","3","4","5","6","7","8","9","10","jack","queen","kin
 
 int cardW, cardH;
 
+void drawStart(){
+
+  if(started){
+    print("Game already started");
+    return;
+  }
+
+  
+  else{
+    background(FELT_DARK);
+    noStroke();
+    fill(FELT);
+    ellipse(width/2, height/2,int(width * 0.9),int(height * 0.8));
+    noFill();
+    strokeWeight(2);
+    stroke(#2E8B57, 80);
+    //inner ring
+    ellipse(width/2, height/2,int(width * 0.850),int(height * 0.72));
+    noStroke();
+    drawStartButtons();    
+  }
+
+}
 void drawTable() {
   background(FELT_DARK);
   noStroke();
@@ -44,42 +70,42 @@ void drawTable() {
   stroke(#2E8B57, 80);
   ellipse(width/2, height/2,int(width * 0.850),int(height * 0.72));
   noStroke();
-
-  if (!isStarted) {
-    rectMode(CENTER);
-    textAlign(CENTER, CENTER);
-    stroke(0);
-    fill(BTN_HIT);
-    rect(int(width/2), int(height/2), int(width*0.07125), int(height*0.068), int(width*0.0078));
-    fill(0);
-    text("Start", int(width/2), int(height/2));
-    if (mousePressed && !wasPressed) {
-      isStarted = true;
-    }
-    wasPressed = mousePressed;
-    return;
-  }
-
-  else{
-    //inner ring
-    drawButtons();
-    drawDealerHand(int(width*0.487), int(height*0.3), cardW, cardH);
-    drawBoard();
-  }
+  //inner ring
+  drawButtons();
+  drawDealerHand(int(width*0.487), int(height*0.3), cardW, cardH);
+  drawBoard();
+  
 }
 
+void drawStartButtons(){
+  rectMode(CENTER);
+  textAlign(CENTER, CENTER);
+  stroke(0);
+  //start button
+  fill(BTN_START);
+  rect(int(width/2), int(height/2), int(width*0.17125), int(height*0.068), int(width*0.0078));
+  fill(0);
+  text("Start", int(width/2), int(height/2));
+
+  //Add Friends Button
+  fill(BTN_ADD_FRIENDS);
+  rect(int(width/2), int(height/1.7), int(width*0.17125), int(height*0.068), int(width*0.0078));
+  fill(0);
+  text("Add Friends", int(width/2), int(height/1.7));
+  
+}
 void drawButtons() {
   rectMode(CENTER);
   textAlign(CENTER, CENTER);
   stroke(0);
-  
+
   //Double Button
   fill(BTN_DOUBLE);
   rect(int(width*0.35), int(height*0.95), int(width*0.07125), int(height*0.068), int(width*0.0078));
   fill(0);
   text("Double", int(width*0.35), int(height*0.95));
 
-  
+
   //Stand button
   fill(BTN_STAND);
   rect(int(width*0.45), int(height*0.95), int(width*0.07125), int(height*0.068), int(width*0.0078));
@@ -103,6 +129,7 @@ void drawButtons() {
   rect(int(width/2), int(height*0.12), int(width*0.036458), int(height*0.0416666));
   fill(0);
   text("Dealer", int(width/2), int(height*0.12));
+  
 }
 
 void drawPlayerHand(int playerIndex, float x, float y, float w, float h) {
