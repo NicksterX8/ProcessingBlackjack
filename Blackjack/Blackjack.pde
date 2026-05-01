@@ -9,6 +9,8 @@
 
 Game game = new Game();
 CountDracula count = new CountDracula();
+int numBots = 3;
+IntList bets = new IntList();
 
 void setup() {
  //size(1440,1080); //to test scaling.
@@ -17,32 +19,87 @@ void setup() {
  f = createFont("Yu Gothic Bold", fontSize); 
  textFont(f);
  pixelDensity(1);
- 
- int numBots = 3;
- String playerName = "Bob";
- 
  cardW = int(width*0.027);
  cardH = int(height*0.067);
  loadCards();
- 
- game.addHumanPlayer(playerName);
- for (int i = 0; i < numBots; i++) {
-   game.addBotPlayer();
- }
- game.startGame();
- IntList bets = new IntList();
- for (int i = 0; i < numBots + 1; i++) {
-   bets.append(20); // change to amount decided by players
- }
- game.startRound(bets);
- currPlayer = game.players.get(0);
+
 }
 
 void draw() {
-   background(255);
-   
-   drawTable();
- 
+  background(255);
+  if(!started) {
+    //start button
+    if (mouseX > width*0.4144 && mouseX < width*0.5856 &&
+    mouseY > height*0.466 && mouseY < height*0.534) {
+      BTN_START = BTN_HOVER;
+      if (mousePressed && !wasPressed) {
+        started = true;
+        println("Game Started!");
+        gameInit();
+      }
+    }
+    else{BTN_START = #39F070;}
+
+    //add friends button
+    if (mouseX > width*0.4144 && mouseX < width*0.5856 &&
+    mouseY > height*0.5542 && mouseY < height*0.6222) {
+      BTN_HOST = BTN_HOVER;
+      if (mousePressed && !wasPressed) {
+        //host button logic
+        if(portInput.length() == 0) {
+          println("Please enter a port number to host on.");
+        } else {
+          println("Hosting game on port " + portInput);
+        }
+        wasPressed = true;
+      }
+    } 
+    else {
+      BTN_HOST= #F2975F;
+    }
+
+    //Host Port Input Box
+    if (mouseX > (width/2 + width*0.11) && mouseX < (width/2 + width*0.23) &&
+      mouseY > height*0.5542 && mouseY < height*0.6222) {
+    if (mousePressed) {
+        portBoxActive = true;
+        joinBoxActive = false;
+      }
+    }
+
+    // Join button
+    if (mouseX > width*0.4144 && mouseX < width*0.5856 &&
+        mouseY > height*0.622 && mouseY < height*0.690) {
+        BTN_JOIN = BTN_HOVER;
+      if (mousePressed && !wasPressed) {
+        
+        // join logic here
+        wasPressed = true;
+      }
+    }
+    else{
+      BTN_JOIN = #1A5EA8;;
+    }
+
+    // Join port box click
+    if (mouseX > (width/2 + width*0.11) && mouseX < (width/2 + width*0.23) &&
+        mouseY > height*0.622 && mouseY < height*0.690) {
+      if (mousePressed) {
+        joinBoxActive = true;
+        portBoxActive = false;
+      }
+    }
+
+    drawStart();
+    return;
+  }
+
+  drawTable();
+  
+
+
+  
+  
   Hand activeHand = getActiveHand();
   if(game.currentRound.active){ 
      //Double button
@@ -97,7 +154,7 @@ void draw() {
     }else BTN_SPLIT = #404040;
   }
    
-   if (game.frameNumber - game.lastActionFrame > 90) {
+   if (game.frameNumber - game.lastActionFrame > 15) {
      if (game.currentRound.active) {
        if (game.currentRound.revolutions < 2) {
          // been enough time from last card dealt, deal one
@@ -113,6 +170,22 @@ void draw() {
    
    game.frameNumber++;
 }
+
+void gameInit(){
+  String playerName = "Bob";
+  game.startGame();
+  game.addHumanPlayer(playerName);
+  for (int i = 0; i < numBots; i++) {
+    game.addBotPlayer();
+  }
+  for (int i = 0; i < numBots + 1; i++) {
+   bets.append(20); // change to amount decided by players
+  }    
+  game.startRound(bets);
+  currPlayer = game.players.get(0);
+}
+
+
 
 void drawBoard() {
   text("Round " + game.roundNumber, width/2, 20);
@@ -134,7 +207,6 @@ void drawBoard() {
       }
         //text("Chips: " + player.chips, int(width*0.045), blockY + lineHeight);
       
-
      drawChip(int(width*0.045) + 35, blockY + lineHeight, 35, #B83232 , player.chips);
      //text("Chips: " + player.chips, int(width*0.045), int(height*0.068)+ i*int((height*0.055)));
      
@@ -167,6 +239,23 @@ void drawBoard() {
 }
 
 void keyPressed() {
+  if (portBoxActive) {
+    
+    if (key == BACKSPACE && portInput.length() > 0)
+      portInput = portInput.substring(0, portInput.length() - 1);
+    
+      else if (key >= '0' && key <= '9' && portInput.length() < 5)
+      portInput += key;
+    }
+
+  if (joinBoxActive) {
+    if (key == BACKSPACE && joinInput.length() > 0)
+      joinInput = joinInput.substring(0, joinInput.length() - 1);
+    
+      else if (key >= '0' && key <= '9' && joinInput.length() < 5)
+      joinInput += key;
+  }
+
     switch (key) {
        case 'h':
          game.doHumanAction(PlayerActionType.HIT);

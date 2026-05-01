@@ -9,11 +9,12 @@
 color FELT        = #1B6B38;
 color FELT_DARK   = #145530;
 color BTN_START = #39F070;
-color BTN_ADD_FRIENDS = #F2975F;
+color BTN_HOST = #F2975F;
 color BTN_HIT     = #39F070;
 color BTN_STAND   = #B83232;
 color BTN_DOUBLE  = #F2975F;
 color BTN_SPLIT   = #1A5EA8;
+color BTN_JOIN   = #1A5EA8;
 color BTN_HOVER   = #b9b9b9;
 
 PFont f;
@@ -29,6 +30,10 @@ boolean wasPressed = false; //boolean flag for button logic in draw()
 PImage cardBack;
 HashMap<String, PImage> cardImages = new HashMap<String, PImage>();
 boolean cardsLoaded = false;
+String portInput = "";
+String joinInput = "";
+boolean portBoxActive = false;
+boolean joinBoxActive = false;
 
 //list of suits, matches the folder names under cards/
 String[] SUITS = {"hearts", "diamonds", "clubs", "spades"};
@@ -88,10 +93,40 @@ void drawStartButtons(){
   text("Start", int(width/2), int(height/2));
 
   //Add Friends Button
-  fill(BTN_ADD_FRIENDS);
+  fill(BTN_HOST);
   rect(int(width/2), int(height/1.7), int(width*0.17125), int(height*0.068), int(width*0.0078));
   fill(0);
-  text("Add Friends", int(width/2), int(height/1.7));
+  text("Host Game", int(width/2), int(height/1.7));
+
+  // Port input box next to Host button
+  strokeWeight(4);
+  stroke(portBoxActive ? 0 : 200);
+  fill(255);
+  rect(int(width/2) + int(width*0.17), int(height/1.7), int(width*0.12), int(height*0.068), int(width*0.0078));
+  fill(0);
+
+  //display ghost text for host button
+  text(portInput.length() > 0 ? portInput : "Set Port...", int(width/2) + int(width*0.17), int(height/1.7));
+
+  // Join button
+  stroke(0);
+  strokeWeight(2);
+  fill(BTN_JOIN);
+  rect(int(width/2), int(height/1.5), int(width*0.17125), int(height*0.068), int(width*0.0078));
+  fill(0);
+  text("Join", int(width/2), int(height/1.5));
+
+  // Port input box next to Join button
+  strokeWeight(4);
+  stroke(joinBoxActive ? 0 : 200);
+  fill(255);
+  rect(int(width/2) + int(width*0.17), int(height/1.5), int(width*0.12), int(height*0.068), int(width*0.0078));
+  fill(0);
+  noStroke();
+  //display ghost text for join button
+  text(joinInput.length() > 0 ? joinInput : "Join Port...", int(width/2) + int(width*0.17), int(height/1.5));
+  strokeWeight(1);
+  stroke(0);
   
 }
 void drawButtons() {
