@@ -20,7 +20,7 @@ PFont f;
 Player currPlayer;
 int currBet = 1;
 int playerChips = 500;
-
+boolean isStarted = false;
 boolean wasPressed = false; //boolean flag for button logic in draw()
 
 PImage cardBack;
@@ -39,15 +39,33 @@ void drawTable() {
   noStroke();
   fill(FELT);
   ellipse(width/2, height/2,int(width * 0.9),int(height * 0.8));
-  //inner ring
   noFill();
   strokeWeight(2);
   stroke(#2E8B57, 80);
   ellipse(width/2, height/2,int(width * 0.850),int(height * 0.72));
   noStroke();
-  drawButtons();
-  drawDealerHand(int(width*0.487), int(height*0.3), cardW, cardH);
-  drawBoard();
+
+  if (!isStarted) {
+    rectMode(CENTER);
+    textAlign(CENTER, CENTER);
+    stroke(0);
+    fill(BTN_HIT);
+    rect(int(width/2), int(height/2), int(width*0.07125), int(height*0.068), int(width*0.0078));
+    fill(0);
+    text("Start", int(width/2), int(height/2));
+    if (mousePressed && !wasPressed) {
+      isStarted = true;
+    }
+    wasPressed = mousePressed;
+    return;
+  }
+
+  else{
+    //inner ring
+    drawButtons();
+    drawDealerHand(int(width*0.487), int(height*0.3), cardW, cardH);
+    drawBoard();
+  }
 }
 
 void drawButtons() {
