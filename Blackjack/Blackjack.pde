@@ -28,72 +28,9 @@ void setup() {
 void draw() {
   background(255);
   if(!started) {
-    //start button
-    if (mouseX > width*0.4144 && mouseX < width*0.5856 &&
-    mouseY > height*0.466 && mouseY < height*0.534) {
-      BTN_START = BTN_HOVER;
-      if (mousePressed && !wasPressed) {
-        started = true;
-        println("Game Started!");
-        gameInit();
-      }
-    }
-    else{BTN_START = #39F070;}
-
-    //add friends button
-    if (mouseX > width*0.4144 && mouseX < width*0.5856 &&
-    mouseY > height*0.5542 && mouseY < height*0.6222) {
-      BTN_HOST = BTN_HOVER;
-      if (mousePressed && !wasPressed) {
-        //host button logic
-        if(portInput.length() == 0) {
-          println("Please enter a port number to host on.");
-        } else {
-          println("Hosting game on port " + portInput);
-        }
-        wasPressed = true;
-      }
-    } 
-    else {
-      BTN_HOST= #F2975F;
-    }
-
-    //Host Port Input Box
-    if (mouseX > (width/2 + width*0.11) && mouseX < (width/2 + width*0.23) &&
-      mouseY > height*0.5542 && mouseY < height*0.6222) {
-    if (mousePressed) {
-        portBoxActive = true;
-        joinBoxActive = false;
-      }
-    }
-
-    // Join button
-    if (mouseX > width*0.4144 && mouseX < width*0.5856 &&
-        mouseY > height*0.622 && mouseY < height*0.690) {
-        BTN_JOIN = BTN_HOVER;
-      if (mousePressed && !wasPressed) {
-        
-        // join logic here
-        wasPressed = true;
-      }
-    }
-    else{
-      BTN_JOIN = #1A5EA8;;
-    }
-
-    // Join port box click
-    if (mouseX > (width/2 + width*0.11) && mouseX < (width/2 + width*0.23) &&
-        mouseY > height*0.622 && mouseY < height*0.690) {
-      if (mousePressed) {
-        joinBoxActive = true;
-        portBoxActive = false;
-      }
-    }
-
-    drawStart();
+    drawStartInteract();
     return;
   }
-
   drawTable();
   
 
@@ -185,7 +122,82 @@ void gameInit(){
   currPlayer = game.players.get(0);
 }
 
+void drawStartInteract(){
+  // Start button
+  if (mouseX > width*0.425 && mouseX < width*0.575 && mouseY > height*0.416 && mouseY < height*0.484) {
+    BTN_START = BTN_HOVER;
+    if (mousePressed && !wasPressed) {
+      started = true;
+      println("Game Started!");
+      gameInit();
+      wasPressed = true;
+    }
+  } 
+  else { BTN_START = #39F070; }
 
+  // Host button
+  if (mouseX > (width/2 - width*0.13) && mouseX < (width/2 + width*0.02) && mouseY > height*0.516 && mouseY < height*0.584) {
+    BTN_HOST = BTN_HOVER;
+    if (mousePressed && !wasPressed) {
+      if (portInput.length() == 0) {
+        println("Please enter a port number.");
+      } 
+      else {
+        //hostGame();
+      }
+      wasPressed = true;
+    }
+  } else { BTN_HOST = #F2975F; }
+
+  // Host port box
+  if (mouseX > (width/2 + width*0.03) && mouseX < (width/2 + width*0.13) &&
+      mouseY > height*0.516 && mouseY < height*0.584) {
+    if (mousePressed) {
+      portBoxActive = true;
+      joinBoxActive = false;
+      ipBoxActive = false;
+    }
+  }
+
+  // Join button
+  if (mouseX > (width/2 - width*0.20) && mouseX < (width/2 - width*0.05) &&
+      mouseY > height*0.616 && mouseY < height*0.684) {
+    BTN_JOIN = BTN_HOVER;
+    if (mousePressed && !wasPressed) {
+      if (joinInput.length() == 0 || ipInput.length() == 0) {
+        println("Please enter IP and port.");
+      } else {
+        //joinGame();
+      }
+      wasPressed = true;
+    }
+  } else { BTN_JOIN = #1A5EA8; }
+
+  // IP box
+  if (mouseX > (width/2 - width*0.04) && mouseX < (width/2 + width*0.09) &&
+      mouseY > height*0.616 && mouseY < height*0.684) {
+    if (mousePressed) {
+      ipBoxActive = true;
+      joinBoxActive = false;
+      portBoxActive = false;
+    }
+  }
+
+  // Join port box
+  if (mouseX > (width/2 + width*0.10) && mouseX < (width/2 + width*0.20) &&
+      mouseY > height*0.616 && mouseY < height*0.684) {
+    if (mousePressed) {
+      joinBoxActive = true;
+      portBoxActive = false;
+      ipBoxActive = false;
+    }
+  }
+
+  if (!mousePressed) wasPressed = false;
+
+  drawStart();
+  return;
+}
 
 void drawBoard() {
   text("Round " + game.roundNumber, width/2, 20);
@@ -239,6 +251,7 @@ void drawBoard() {
 }
 
 void keyPressed() {
+  //host port button
   if (portBoxActive) {
     
     if (key == BACKSPACE && portInput.length() > 0)
@@ -248,6 +261,15 @@ void keyPressed() {
       portInput += key;
     }
 
+  if(ipBoxActive){
+      if (key == BACKSPACE && ipInput.length() > 0)
+      ipInput = ipInput.substring(0, ipInput.length() - 1);
+    
+      else if ((key >= '0' && key <= '9' || key == '.') && ipInput.length() < 15)
+      ipInput += key;
+  }
+  
+  //join port button
   if (joinBoxActive) {
     if (key == BACKSPACE && joinInput.length() > 0)
       joinInput = joinInput.substring(0, joinInput.length() - 1);
@@ -255,6 +277,7 @@ void keyPressed() {
       else if (key >= '0' && key <= '9' && joinInput.length() < 5)
       joinInput += key;
   }
+  
 
     switch (key) {
        case 'h':

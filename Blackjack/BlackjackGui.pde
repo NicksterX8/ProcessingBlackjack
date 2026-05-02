@@ -34,6 +34,9 @@ String portInput = "";
 String joinInput = "";
 boolean portBoxActive = false;
 boolean joinBoxActive = false;
+String ipInput = "";
+boolean ipBoxActive = false;
+float rainbowHue = 0;
 
 //list of suits, matches the folder names under cards/
 String[] SUITS = {"hearts", "diamonds", "clubs", "spades"};
@@ -85,50 +88,83 @@ void drawTable() {
 void drawStartButtons(){
   rectMode(CENTER);
   textAlign(CENTER, CENTER);
+  
+  // title
+  fill(255, 255, 255);
+  textSize(int(width/40));
+
+  //rainbow title for fun
+  colorMode(HSB, 360, 100, 100);
+  fill(rainbowHue, 100, 100);
+  text("BLACKJACK", int(width/2), int(height*0.35));
+  rainbowHue += 0.6;
+  if (rainbowHue >= 360) rainbowHue = 0;
+  colorMode(RGB, 255);
+  textSize(int(width/96));
+
+  //START ROW
   stroke(0);
-  //start button
   fill(BTN_START);
-  rect(int(width/2), int(height/2), int(width*0.17125), int(height*0.068), int(width*0.0078));
+  rect(int(width/2), int(height*0.45), int(width*0.15), int(height*0.068), int(width*0.0078));
   fill(0);
-  text("Start", int(width/2), int(height/2));
+  text("Start", int(width/2), int(height*0.45));
 
-  //Add Friends Button
-  fill(BTN_HOST);
-  rect(int(width/2), int(height/1.7), int(width*0.17125), int(height*0.068), int(width*0.0078));
-  fill(0);
-  text("Host Game", int(width/2), int(height/1.7));
+  //HOST ROW (button + port box centered as group)
+  // total row width = 0.15 + 0.01 gap + 0.10 = 0.26
+  // left edge = width/2 - width*0.13
+  int hostBtnX = int(width/2 - width*0.055); // button center
+  int hostPortX = int(width/2 + width*0.08);  // port box center
 
-  // Port input box next to Host button
-  strokeWeight(4);
-  stroke(portBoxActive ? 0 : 200);
-  fill(255);
-  rect(int(width/2) + int(width*0.17), int(height/1.7), int(width*0.12), int(height*0.068), int(width*0.0078));
-  fill(0);
-
-  //display ghost text for host button
-  text(portInput.length() > 0 ? portInput : "Set Port...", int(width/2) + int(width*0.17), int(height/1.7));
-
-  // Join button
   stroke(0);
-  strokeWeight(2);
-  fill(BTN_JOIN);
-  rect(int(width/2), int(height/1.5), int(width*0.17125), int(height*0.068), int(width*0.0078));
+  fill(BTN_HOST);
+  rect(hostBtnX, int(height*0.55), int(width*0.15), int(height*0.068), int(width*0.0078));
   fill(0);
-  text("Join", int(width/2), int(height/1.5));
+  text("Host Game", hostBtnX, int(height*0.55));
 
-  // Port input box next to Join button
-  strokeWeight(4);
-  stroke(joinBoxActive ? 0 : 200);
-  fill(255);
-  rect(int(width/2) + int(width*0.17), int(height/1.5), int(width*0.12), int(height*0.068), int(width*0.0078));
+  strokeWeight(2);
+  stroke(portBoxActive ? 0 : 150);
+  fill(255, 255, 255, 230);
+  rect(hostPortX, int(height*0.55), int(width*0.10), int(height*0.068), int(width*0.0078));
+  fill(portBoxActive ? 0 : #888888);
+  noStroke();
+  text(portInput.length() > 0 ? portInput : "Port...", hostPortX, int(height*0.55));
+
+  // JOIN ROW (button + ip box + port box)
+  // total row width = 0.15 + 0.01 + 0.13 + 0.01 + 0.10 = 0.40
+  // left edge = width/2 - width*0.20
+  int joinBtnX  = int(width/2 - width*0.125); // button center
+  int joinIpX   = int(width/2 + width*0.025);  // ip box center
+  int joinPortX = int(width/2 + width*0.15);   // port box center
+
+  strokeWeight(2);
+  stroke(0);
+  fill(BTN_JOIN);
+  rect(joinBtnX, int(height*0.65), int(width*0.15), int(height*0.068), int(width*0.0078));
   fill(0);
   noStroke();
-  //display ghost text for join button
-  text(joinInput.length() > 0 ? joinInput : "Join Port...", int(width/2) + int(width*0.17), int(height/1.5));
+  text("Join", joinBtnX, int(height*0.65));
+
+  strokeWeight(2);
+  stroke(ipBoxActive ? 0 : 150);
+  fill(255, 255, 255, 230);
+  rect(joinIpX, int(height*0.65), int(width*0.13), int(height*0.068), int(width*0.0078));
+  fill(ipBoxActive ? 0 : #888888);
+  noStroke();
+  text(ipInput.length() > 0 ? ipInput : "IP...", joinIpX, int(height*0.65));
+
+  strokeWeight(2);
+  stroke(joinBoxActive ? 0 : 150);
+  fill(255, 255, 255, 230);
+  rect(joinPortX, int(height*0.65), int(width*0.10), int(height*0.068), int(width*0.0078));
+  fill(joinBoxActive ? 0 : #888888);
+  noStroke();
+  text(joinInput.length() > 0 ? joinInput : "Port...", joinPortX, int(height*0.65));
+
   strokeWeight(1);
   stroke(0);
-  
 }
+
+
 void drawButtons() {
   rectMode(CENTER);
   textAlign(CENTER, CENTER);
