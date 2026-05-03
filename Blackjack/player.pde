@@ -61,6 +61,8 @@ class Player {
   // round information, maybe should be stored in Round
   ArrayList<Hand> currentHands = new ArrayList<Hand>(); // needs to be an array of hands incase of splits
   
+  int currentBet = 0;
+  
   Player(int playerID, boolean isHuman, String playerName) {
     id = playerID;
     human = isHuman;

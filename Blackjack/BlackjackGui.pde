@@ -19,8 +19,6 @@ color BTN_HOVER   = #b9b9b9;
 
 PFont f;
 
-
-Player currPlayer;
 int currBet = 1;
 int playerChips = 500;
 boolean started = false;
@@ -68,7 +66,7 @@ void drawStart(){
   }
 
 }
-void drawTable() {
+void drawTable(boolean takingBets) {
   background(FELT_DARK);
   noStroke();
   fill(FELT);
@@ -79,7 +77,7 @@ void drawTable() {
   ellipse(width/2, height/2,int(width * 0.850),int(height * 0.72));
   noStroke();
   //inner ring
-  drawButtons();
+  drawButtons(takingBets);
   drawDealerHand(int(width*0.487), int(height*0.3), cardW, cardH);
   drawBoard();
   
@@ -165,35 +163,66 @@ void drawStartButtons(){
 }
 
 
-void drawButtons() {
+void drawButtons(boolean takingBets) {
   rectMode(CENTER);
   textAlign(CENTER, CENTER);
   stroke(0);
-
-  //Double Button
-  fill(BTN_DOUBLE);
-  rect(int(width*0.35), int(height*0.95), int(width*0.07125), int(height*0.068), int(width*0.0078));
-  fill(0);
-  text("Double", int(width*0.35), int(height*0.95));
-
-
-  //Stand button
-  fill(BTN_STAND);
-  rect(int(width*0.45), int(height*0.95), int(width*0.07125), int(height*0.068), int(width*0.0078));
-  fill(0);
-  text("Stand", int(width*0.45),int(height*0.95));
+  textSize(16);
   
-  //Hit button
-  fill(BTN_HIT);
-  rect(int(width*0.55), int(height*0.95), int(width*0.07125), int(height*0.068), int(width*0.0078));
-  fill(0);
-  text("Hit", int(width*0.55), int(height*0.95));
+  Player currentPlayer = game.currentRound.players.get(playerBetTurn);
+
+  if (takingBets) {
+    // show current bet amount
+    drawChip(width/2, height/2, 80, #B83232, currentPlayer.currentBet, 2.0);
+    
+    // decrease bet button
+    fill(BTN_STAND);
+    rect(int(width*0.45), int(height*0.95), int(width*0.07125), int(height*0.068), int(width*0.0078));
+    fill(0);
+    text("-10 Chips", int(width*0.45),int(height*0.95));
+    
+    // increase bet button
+    fill(BTN_HIT);
+    rect(int(width*0.55), int(height*0.95), int(width*0.07125), int(height*0.068), int(width*0.0078));
+    fill(0);
+    text("+10 Chips", int(width*0.55), int(height*0.95));
+    
+    // confirm bet button
+    fill(BTN_SPLIT);
+    rect(int(width*0.65), int(height*0.95), int(width*0.07125), int(height*0.068), int(width*0.0078));
+    fill(0);
+    text("Confirm bet", int(width*0.65), int(height*0.95));
+    return;
+  }
   
-  //Split button
-  fill(BTN_SPLIT);
-  rect(int(width*0.65), int(height*0.95), int(width*0.07125), int(height*0.068), int(width*0.0078));
-  fill(0);
-  text("Split", int(width*0.65), int(height*0.95));
+  if (game.currentRound.revolutions >= 2 && currentPlayer != null && currentPlayer.human && currentPlayer.active()) {
+  
+    //Double Button
+    fill(BTN_DOUBLE);
+    rect(int(width*0.35), int(height*0.95), int(width*0.07125), int(height*0.068), int(width*0.0078));
+    fill(0);
+    text("Double", int(width*0.35), int(height*0.95));
+  
+  
+    //Stand button
+    fill(BTN_STAND);
+    rect(int(width*0.45), int(height*0.95), int(width*0.07125), int(height*0.068), int(width*0.0078));
+    fill(0);
+    text("Stand", int(width*0.45),int(height*0.95));
+    
+    //Hit button
+    fill(BTN_HIT);
+    rect(int(width*0.55), int(height*0.95), int(width*0.07125), int(height*0.068), int(width*0.0078));
+    fill(0);
+    text("Hit", int(width*0.55), int(height*0.95));
+    
+    //Split button
+    fill(BTN_SPLIT);
+    rect(int(width*0.65), int(height*0.95), int(width*0.07125), int(height*0.068), int(width*0.0078));
+    fill(0);
+    text("Split", int(width*0.65), int(height*0.95));
+  
+  }
   
   //Dealers tag
   fill(#EDE860);
@@ -204,33 +233,70 @@ void drawButtons() {
 }
 
 void drawPlayerHand(int playerIndex, float x, float y, float w, float h) {
-  ArrayList<Hand> hands = game.players.get(playerIndex).currentHands;
+  int activePlayer = game.currentRound.turn;
+  int activeHand = game.currentRound.handNumber;
+  
+  Player player = game.currentRound.players.get(playerIndex);
+  ArrayList<Hand> hands = player.currentHands;
   float handGroupOffset = w * 3.2; //space between split hands
   float offset = w * 0.6; // overlap cards slightly
-  for(int i = 0; i < hands.size(); i++) {
+  for(int i = 0; i < hands.size(); i++) {  
+    Hand hand = hands.get(i);
+   
     float handX = x + i * handGroupOffset;
-    if(game.currentRound.active) {
-      drawChip(handX, y - (int(height*0.0555)), 35, #B83232, game.players.get(playerIndex).currentHands.get(i).betChips);
+    
+    if (hand.cards.size() > 0) {
+      
+      fill(255, 255, 0);
+      stroke(0);
+      if (activePlayer == playerIndex && activeHand == i) {
+         // draw a yellow border around the hand indicating it's that hand's turn
+         ellipse(handX, y+h, 20, 20);
+      }
     }
-    //text(game.players.get(playerIndex).currentHands.get(i).betChips, handX, y - (int(height*0.0555)));
-    ArrayList<Card> cards = game.players.get(playerIndex).currentHands.get(i).cards;
+    
+    if(game.currentRound.active) {
+      drawChip(handX, y - (int(height*0.0555)), 35, #B83232, game.currentRound.players.get(playerIndex).currentHands.get(i).betChips, 1.0);
+    }
+
+    ArrayList<Card> cards = game.currentRound.players.get(playerIndex).currentHands.get(i).cards;
     
     
     for (int j = 0; j < cards.size(); j++) {
       Card c = cards.get(j);
       drawCard(rankToImageName(c.rank), suitToImageName(c.suit), true, handX + j * offset, y, w, h);
     }
+    
+    // If round ended, show player results
+    textAlign(CENTER, TOP);
+    textSize(18);
+    fill(0);
+    
+    if (!hand.active && !takingBets) {
+       String handResultName = getHandResultString(hand);
+       // only show hand result if round has ended or we already know for sure if they've lost or won
+       if (!game.currentRound.active || handResultName == "Bust" || handResultName == "Blackjack") {
+         text(handResultName, handX + w/2, y + h);
+       }
+    }
   }
   fill(0);
 }
 
 void drawDealerHand(float x, float y, float w, float h) {
+  boolean allPlayersInactive = true;
+   for (Player player : game.currentRound.players) {
+     if (player.active()) {
+        allPlayersInactive = false; 
+     }
+   }
+  
   ArrayList<Card> cards = game.currentRound.dealerHand.cards;
   float offset = w * 1.1;
   for (int j = 0; j < cards.size(); j++) {
     Card c = cards.get(j);
-    // second card face down while round is active
-    boolean faceUp = !(j == 1 && game.currentRound.active);
+    // second card face down while players are playing
+    boolean faceUp = j != 1 || allPlayersInactive;
     drawCard(rankToImageName(c.rank), suitToImageName(c.suit), faceUp, x + j * offset, y, w, h);
   }
 }
@@ -291,15 +357,17 @@ void drawCardBack(float x, float y, float w, float h) {
   image(cardBack, x, y, w, h);
 }
 
-void drawChip(float x, float y, float r, color chipColor, int amount) {
-  PFont f2;
-  f2 = createFont("Yu Gothic Bold", int(width/170)); 
+PFont f2;
+
+void drawChip(float x, float y, float r, color chipColor, int amount, float textScale) {
   textFont(f2);
   
   fill(255);
+  stroke(0);
   circle(x,y,r);
   
   fill(chipColor);
+  
   circle(x,y,r*0.85);
   
   float dashRadius = r * 0.43;
@@ -310,7 +378,6 @@ void drawChip(float x, float y, float r, color chipColor, int amount) {
     fill(255);
     noStroke();
     ellipse(dx, dy, r * 0.12, r * 0.12);
-    stroke(1);
   }
       
    fill(chipColor);
@@ -318,16 +385,26 @@ void drawChip(float x, float y, float r, color chipColor, int amount) {
    
    fill(255);
    textAlign(CENTER, CENTER);
+   textSize(14 * textScale);
    text(amount, x, y);
    textFont(f);
    
+   stroke(0);
 }
 
 Hand getActiveHand() {
   if (!game.currentRound.active) return null;
-  if (game.currentRound.turn >= game.players.size()) return null;
-  Player p = game.currentRound.players.get(game.currentRound.turn);
+  if (game.currentRound.turn >= game.currentRound.players.size()) return null;
+  
+  Player p = game.currentRound.activePlayer();
+  if (p == null ||!p.active()) {
+    return game.currentRound.nextHand();
+  }
   if (!p.human) return null;
   if (p.currentHands.size() == 0) return null;
-  return p.currentHands.get(game.currentRound.handNumber);
+  Hand currentHand = p.currentHands.get(game.currentRound.handNumber);
+  if (currentHand == null || !currentHand.active) {
+     return game.currentRound.nextHand(); 
+  }
+  return currentHand;
 }

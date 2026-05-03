@@ -7,8 +7,10 @@ class PlayerActionResult {
 }
 
 enum HandResultType {
-   LOSE, WIN, BLACKJACK, PUSH
+   BUST, LOSE, WIN, BLACKJACK, PUSH
 }
+
+final String[] HandResultNames = {"Bust", "Loss", "Win", "Blackjack", "Push"};
 
 // a round of blackjack
 // a game is made up of some number of rounds
@@ -24,7 +26,7 @@ class Round {
     ArrayList<Player> players;
     Hand dealerHand = new Hand(0);
     boolean active = false; // round is currently going. Set to true when round begins and false when the last player finishes their hand
-    int revolutions = 0; // number of revolutions around the table have passed
+    int revolutions = 0; // number of revolutions around the table that have passed
     
     Round(ArrayList<Player> _players, int numberOfDecks) {
       numDecks = numberOfDecks;
@@ -33,7 +35,16 @@ class Round {
     }
     
     Player activePlayer() {
+       if (turn >= players.size()) return null;
        return players.get(turn); 
+    }
+    
+    void changePlayers(ArrayList<Player> newPlayers) {
+      if (active || turn != 0 || handNumber != 0) {
+         print("Error: cannot change players while round is active");
+         return;
+      }
+      players = newPlayers;
     }
     
     void startRound(IntList bets) {
@@ -60,10 +71,13 @@ class Round {
       int value = hand.value();
       int dealerValue = dealerHand.value();
       if (hand.isBust()) {
-        return HandResultType.LOSE;
+        return HandResultType.BUST;
       } else if (hand.isBlackjack()) {
         // blackjack pays 3:2
         return HandResultType.BLACKJACK;
+      } else if (dealerValue > 21) {
+         // Win from dealer busting
+         return HandResultType.WIN; 
       } else if (value > dealerValue) {
         // normal win
         return HandResultType.WIN;
@@ -75,12 +89,14 @@ class Round {
     }
     
     void endRound() {
+       print("Ending round.\n");
        if (active) {
           print("Error: cannot end active round.\n");
           return;
        }
        
        // Dealer drawing cards after the first two not implemented yet
+       
        
        // calculate chip gain/loss
        for (Player player : players) {
@@ -100,21 +116,28 @@ class Round {
                case LOSE:
                  chipsGained = 0;
                  break;
+               case BUST:
+                 chipsGained = 0;
+                 break;
              }
             
             player.chips += chipsGained;
+            if (player.chips == 0) {
+              print(player.name + " is out!\n");
+            }
           }
        }
        
-       
+       turn = 0;
+       handNumber = 0;
     }
     
-    void nextHand() {
+    Hand nextHand() {
       Player currentPlayer = players.get(turn);
       if (++handNumber < currentPlayer.currentHands.size() && currentPlayer.currentHands.get(handNumber).active) {
         // go to next hand of player instead of next player
         print("Hand #" + handNumber + "\n");
-        return;
+        return currentPlayer.currentHands.get(handNumber);
       } else {
         handNumber = 0;
       }
@@ -127,21 +150,23 @@ class Round {
        }
       }
       if (!anyPlayerActive) {
-        active = false; // round over
-        return; 
+        return null; 
       }
+      
       // increment turn number until an active player is found. We made sure there is atleast one
       do {
        turn = (turn + 1) % players.size(); // increment turn number, wrapping back to 0 
       } while (!players.get(turn).active());
       currentPlayer = players.get(turn);
-      currPlayer = currentPlayer;
       print(currentPlayer.name + "'s turn.\n");
+      Hand hand = null;
       while (!currentPlayer.currentHands.get(handNumber).active) {
          handNumber++;
          assert(handNumber < currentPlayer.currentHands.size());
+         hand = currentPlayer.currentHands.get(handNumber);
       }
       print("Hand #" + handNumber + "\n");
+      return hand;
     }
     
     // draw one card from the deck. Deck must not be empty
@@ -165,7 +190,13 @@ class Round {
         print("The dealer drew a " + card.rank + " of " + SuitNames[card.suit] + "s.\n");
         if (dealerHand.isBlackjack()) {
            // round over, dealer beats anyone who does not have blackjack
-           active = false;
+           print("The dealer got blackjack! Unlucky!");
+           for (Player player : players) {
+              for (Hand hand : player.currentHands) {
+                 hand.active = false;
+              }
+              player.activeHands = 0;
+           }
         }
         
         turn = 0;
@@ -222,6 +253,7 @@ class Round {
       else if (hand.is21()) {
          print("21!\n");
          player.activeHands--;
+         hand.active = false;
       }
       return true;
     }
@@ -274,7 +306,7 @@ class Round {
              break;
           }
           
-          // need to make sure player has enough chips to bet on the second hand (splitting doubles your bet)
+          // need to make sure player has enough chips to bet for a double
           if (player.chips < hand.betChips) {
              result.success = false;
              break;
@@ -291,16 +323,15 @@ class Round {
           break;
         }
         case SPLIT: {
-         print(player.name + " splits.\n");
-         if (!hand.isSplittable()) {
-            print("Error: hand is not splittable\n"); 
-            break;
-         }
-         
          // need to make sure player has enough chips to bet on the second hand (splitting doubles your bet)
          if (player.chips < hand.betChips) {
              result.success = false;
              break;
+         }
+         print(player.name + " splits.\n");
+         if (!hand.isSplittable()) {
+            print("Error: hand is not splittable\n"); 
+            break;
          }
          
          Card splitCard = hand.cards.remove(hand.cards.size()-1);
@@ -318,5 +349,18 @@ class Round {
         }
       }
       return result;
+    }
+    
+    // returns true if the dealers turn is over
+    boolean doDealerTurn() {
+        if (dealerHand.value() < 16) {
+           Card card = drawCard();
+           dealerHand.cards.add(card);
+           return false;
+        }
+        else {
+          dealerHand.active = false;
+          return true;
+        }
     }
 }
