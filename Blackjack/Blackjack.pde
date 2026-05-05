@@ -33,13 +33,13 @@ void loadMusic() {
 void setup() {
  //size(1440,1080); //to test scaling.
  fullScreen();
- int fontSize = int(width/96);
+ fontSize = int(width/96);
  f = createFont("Yu Gothic Bold", fontSize); 
  f2 = createFont("Yu Gothic Bold", int(width/170)); 
  textFont(f);
  pixelDensity(1);
- cardW = int(width*0.027);
- cardH = int(height*0.067);
+ cardW = int(width*0.031);
+ cardH = int(height*0.075);
  loadCards();
  loadMusic();
 }
@@ -82,12 +82,16 @@ void playerMakeBet() {
 }
 
 void draw() {
+  
   background(255);
   if(!started) {
     drawStartInteract();
     return;
   }
+  
   drawTable(takingBets);
+  
+  
   
   Hand activeHand = getActiveHand();
   Player activePlayer = game.currentRound.activePlayer();
@@ -232,7 +236,7 @@ void draw() {
        playerMakeBet();
     }
  
-   if (takingBets) {
+   if (takingBets && !showFaqPage) {
      textSize(30);
      textAlign(CENTER);
      text("How many chips do you want to bet this round?", width/2, 100);

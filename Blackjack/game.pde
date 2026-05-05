@@ -23,6 +23,7 @@ class Game {
     players.add(new Player(id, false, name));
   }
   
+  
   void startGame() {
      currentRound = new Round(players, 2);
   }

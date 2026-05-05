@@ -1,9 +1,4 @@
-// BlackJack GUI; a brute force method for scaling but it is a functioning prototype for use to link the logical aspect to.
-// only aspexts that need to be included in draw is "drawTable();" and the button controllers. Button controllers are
-// temporarily set to just output to the terminal. The dealer object is just a temporary placeholder until a better idea
-// for it has been made so it does not scale at this time.
-// need to add card creation functions and handling.
-//Draw a green felt table
+// BlackJack GUI functions 
 
 
 color FELT        = #1B6B38;
@@ -35,6 +30,8 @@ boolean joinBoxActive = false;
 String ipInput = "";
 boolean ipBoxActive = false;
 float rainbowHue = 0;
+int fontSize;
+boolean showFaqPage = false;
 
 //list of suits, matches the folder names under cards/
 String[] SUITS = {"hearts", "diamonds", "clubs", "spades"};
@@ -233,13 +230,13 @@ void drawButtons(boolean takingBets) {
 }
 
 void drawPlayerHand(int playerIndex, float x, float y, float w, float h) {
-  int activePlayer = game.currentRound.turn;
-  int activeHand = game.currentRound.handNumber;
+  int activePlayer = game.currentRound.turn; //get the current player
+  int activeHand = game.currentRound.handNumber; //get the hand currently active for that player
   
   Player player = game.currentRound.players.get(playerIndex);
   ArrayList<Hand> hands = player.currentHands;
   float handGroupOffset = w * 3.2; //space between split hands
-  float offset = w * 0.6; // overlap cards slightly
+  float offset = w * 0.35; // overlap cards slightly
   for(int i = 0; i < hands.size(); i++) {  
     Hand hand = hands.get(i);
    
@@ -256,7 +253,8 @@ void drawPlayerHand(int playerIndex, float x, float y, float w, float h) {
     }
     
     if(game.currentRound.active) {
-      drawChip(handX, y - (int(height*0.0555)), 35, #B83232, game.currentRound.players.get(playerIndex).currentHands.get(i).betChips, 1.0);
+      drawChip(handX, y - (int(height*0.0575)), 35, #B83232, game.currentRound.players.get(playerIndex).currentHands.get(i).betChips, 1.0);//draw chips currently bet
+      drawPlayerName(handX - (cardW/2), y - (int(height*0.085)), game.currentRound.players.get(playerIndex).name, 1);
     }
 
     ArrayList<Card> cards = game.currentRound.players.get(playerIndex).currentHands.get(i).cards;
@@ -308,7 +306,7 @@ void drawDeckPile(float x, float y, float w, float h) {
   drawCardBack(x,     y,     w, h);
 }
 
-String rankToImageName(String rank) {
+String rankToImageName(String rank) { //translate from the logical code names to the file names
   switch(rank) {
     case "A": return "ace";
     case "J": return "jack";
@@ -318,7 +316,7 @@ String rankToImageName(String rank) {
   }
 }
 
-String suitToImageName(int suit) {
+String suitToImageName(int suit) { //translate from the logical code names to the file names
   switch(suit) {
     case SPADE:   return "spades";
     case HEART:   return "hearts";
@@ -359,7 +357,7 @@ void drawCardBack(float x, float y, float w, float h) {
 
 PFont f2;
 
-void drawChip(float x, float y, float r, color chipColor, int amount, float textScale) {
+void drawChip(float x, float y, float r, color chipColor, int amount, float textScale) { //draw a poker chip and the amount it represents inside it
   textFont(f2);
   
   fill(255);
@@ -386,13 +384,18 @@ void drawChip(float x, float y, float r, color chipColor, int amount, float text
    fill(255);
    textAlign(CENTER, CENTER);
    textSize(14 * textScale);
+   if(amount > 1000) {
+     textSize(8*textScale);
+   }
    text(amount, x, y);
    textFont(f);
    
    stroke(0);
 }
 
-Hand getActiveHand() {
+Hand getActiveHand() { //function to return which hand is active
+
+
   if (!game.currentRound.active) return null;
   if (game.currentRound.turn >= game.currentRound.players.size()) return null;
   
@@ -407,4 +410,12 @@ Hand getActiveHand() {
      return game.currentRound.nextHand(); 
   }
   return currentHand;
+}
+
+void drawPlayerName(float x, float y, String name, float textScale) {
+  fill(255);
+  textAlign(LEFT, CENTER);
+  textSize(14 * textScale);
+  text(name, x, y);
+  textFont(f);
 }
