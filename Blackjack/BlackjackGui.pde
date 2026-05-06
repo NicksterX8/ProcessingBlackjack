@@ -435,15 +435,15 @@ void drawInfoButton() {
   textSize(int(width/110));
   stroke(0);
   fill(BTN_INFO);
-  rect(int(width*0.957), int(height*0.15), int(width*0.07), int(height*0.04), int(width*0.0078));
+  rect(int(width*0.957), int(height*0.1), int(width*0.07), int(height*0.04), int(width*0.0078));
   fill(255);
   noStroke();
-  text("Info", int(width*0.957), int(height*0.15));
+  text("Info", int(width*0.957), int(height*0.1));
 }
 
 //info button click
 void infoButtonInteract() {
-  if (mouseX > width*0.917 && mouseX < width*0.987 && mouseY > height*0.13 && mouseY < height*0.17) {
+  if (mouseX > width*0.917 && mouseX < width*0.987 && mouseY > height*0.08 && mouseY < height*0.12) {
     BTN_INFO = BTN_HOVER; //<>//
     if (mousePressed && !wasPressed) {
       print("changing");
