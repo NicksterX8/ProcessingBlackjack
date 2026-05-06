@@ -84,6 +84,13 @@ void playerMakeBet() {
 void draw() {
   
   background(255);
+    //-------SALIM-------
+  //info page
+  if (showFaqPage) {
+    drawInfo();
+    return;
+  }
+  //-------SALIM-------
   if(!started) {
     drawStartInteract();
     return;
@@ -96,6 +103,8 @@ void draw() {
   Hand activeHand = getActiveHand();
   Player activePlayer = game.currentRound.activePlayer();
   if (game.currentRound.active) {
+    //info button
+    infoButtonInteract();
      //Double button
     if (activeHand != null && activeHand.isDoubleable()) {
       if(mouseX >= (int(width*0.35)-int(width*0.035625)) && mouseX <= (int(width*0.35)+int(width*0.035625))
@@ -264,9 +273,17 @@ void draw() {
       text("Starting new round...", width/2, height * 0.4);
    }
    
+   //-------SALIM-------
+   //info button (overlays game table)
+   drawInfoButton();
+   infoButtonInteract();
+   //-------SALIM-------
    
    game.frameNumber++;
 }
+
+
+
 
 void gameInit(){
   String playerName = "Bob";
@@ -352,9 +369,16 @@ void drawStartInteract(){
     }
   }
 
+  //-------SALIM-------
   if (!mousePressed) wasPressed = false;
 
   drawStart();
+
+  //info button (overlays start screen)
+  drawInfoButton();
+  infoButtonInteract();
+//-------SALIM-------
+
   return;
 }
 

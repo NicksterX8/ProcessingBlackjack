@@ -419,3 +419,99 @@ void drawPlayerName(float x, float y, String name, float textScale) {
   text(name, x, y);
   textFont(f);
 }
+
+//-------SALIM-------
+//info page stuff
+
+color BTN_INFO = #2C3E50;
+
+//info button (top-right corner)
+void drawInfoButton() {
+  rectMode(CENTER);
+  textAlign(CENTER, CENTER);
+  textSize(int(width/110));
+  stroke(0);
+  fill(BTN_INFO);
+  rect(int(width*0.957), int(height*0.1), int(width*0.07), int(height*0.04), int(width*0.0078));
+  fill(255);
+  noStroke();
+  text("Info", int(width*0.957), int(height*0.1));
+}
+
+//info button click
+void infoButtonInteract() {
+  if (mouseX > width*0.917 && mouseX < width*0.987 && mouseY > height*0.08 && mouseY < height*0.12) {
+    BTN_INFO = BTN_HOVER;
+    if (mousePressed && !wasPressed) {
+      showFaqPage = true;
+      wasPressed = true;
+    }
+  }
+  else { BTN_INFO = #2C3E50; }
+}
+
+//info page
+void drawInfo() {
+  background(FELT_DARK);
+  noStroke();
+  fill(FELT);
+  ellipse(width/2, height/2,int(width * 0.9),int(height * 0.8));
+  noFill();
+  strokeWeight(2);
+  stroke(#2E8B57, 80);
+  //inner ring
+  ellipse(width/2, height/2,int(width * 0.850),int(height * 0.72));
+  noStroke();
+
+  rectMode(CENTER);
+  textAlign(CENTER, CENTER);
+
+  //title
+  fill(255, 255, 255);
+  textSize(int(width/40));
+  text("HOW TO PLAY", int(width/2), int(height*0.14));
+
+  //blackjack
+  textSize(int(width/72));
+  text("Blackjack Basics", int(width/2), int(height*0.22));
+
+  textAlign(LEFT, CENTER);
+  textSize(int(width/96));
+  int leftX = int(width*0.22);
+  text("Goal: get closer to 21 than the dealer without going over.", leftX, int(height*0.27));
+  text("Card values: 2-10 = face value | J/Q/K = 10 | Ace = 1 or 11", leftX, int(height*0.31));
+  text("Actions: HIT, STAND, DOUBLE, SPLIT (two cards of same rank)", leftX, int(height*0.35));
+  text("Beat the dealer to win | Tie = bet returned | Bust or lose = lose bet", leftX, int(height*0.39));
+  text("Dealer hits below 16, stands on 16+", leftX, int(height*0.43));
+
+  //counting
+  textAlign(CENTER, CENTER);
+  textSize(int(width/72));
+  text("Card Counting (Hi-Lo)", int(width/2), int(height*0.51));
+
+  textAlign(LEFT, CENTER);
+  textSize(int(width/96));
+  text("Cards 2-6  ->  +1", leftX, int(height*0.56));
+  text("Cards 7-9  ->   0", leftX, int(height*0.60));
+  text("Cards 10, J, Q, K, A  ->  -1", leftX, int(height*0.64));
+  text("Running count = sum of values seen so far", leftX, int(height*0.68));
+  text("True count = running count / decks remaining", leftX, int(height*0.72));
+  text("High count means more high cards left -> favors the player", leftX, int(height*0.76));
+
+  //back button
+  boolean backHover = (mouseX >= (int(width/2) - int(width*0.075)) && mouseX <= (int(width/2) + int(width*0.075))
+                   && mouseY >= (int(height*0.92) - int(height*0.034)) && mouseY <= (int(height*0.92) + int(height*0.034)));
+  stroke(0);
+  fill(backHover ? BTN_HOVER : BTN_INFO);
+  rect(int(width/2), int(height*0.92), int(width*0.15), int(height*0.068), int(width*0.0078));
+  fill(0);
+  noStroke();
+  text("Back", int(width/2), int(height*0.92));
+
+  if (backHover && mousePressed && !wasPressed) {
+    showFaqPage = false;
+    wasPressed = true;
+  }
+  if (!mousePressed) wasPressed = false;
+}
+//-------SALIM-------
