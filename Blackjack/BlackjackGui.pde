@@ -416,7 +416,7 @@ Hand getActiveHand() { //function to return which hand is active
 }
 
 void drawPlayerName(float x, float y, String name, float textScale) {
-  fill(255);
+  fill(0);
   textAlign(LEFT, CENTER);
   textSize(14 * textScale);
   text(name, x, y);
