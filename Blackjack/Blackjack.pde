@@ -400,7 +400,7 @@ void drawBoard() {
   textAlign(CENTER, TOP);
   text("Round " + game.roundNumber, width/2, 50);
   textAlign(RIGHT, TOP);
-  text("True Count: " + count.getTrueCount(game.currentRound.deck), width-20, 50);
+  text("True Count: " + count.getTrueCount(game.currentRound.deck), int(width-(width * 0.00961538461)), int(width*0.02604166666));
   //player name and number of chips
   textAlign(LEFT, CENTER);
   int lineHeight = int(height * 0.03);
