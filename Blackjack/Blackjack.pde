@@ -84,15 +84,9 @@ void playerMakeBet() {
 void draw() {
   
   background(255);
-    //-------SALIM-------
-  //info page
-  if (showFaqPage) {
-    drawInfo();
-    return;
-  }
-  //-------SALIM-------
   if(!started) {
     drawStartInteract();
+    if (showFaqPage) drawInfo();
     return;
   }
   
@@ -274,9 +268,16 @@ void draw() {
    }
    
    //-------SALIM-------
+   infoButtonInteract();
+  //info page
+  if (showFaqPage) {
+    drawInfo();
+  }
+  //-------SALIM-------
+   
+   //-------SALIM-------
    //info button (overlays game table)
    drawInfoButton();
-   infoButtonInteract();
    //-------SALIM-------
    
    game.frameNumber++;

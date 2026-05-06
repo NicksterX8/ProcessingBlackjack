@@ -330,6 +330,9 @@ String suitToImageName(int suit) { //translate from the logical code names to th
 void loadCards() {
   if (cardsLoaded) return;
   cardBack = loadImage("cards/backs/back_blue1.png");
+  if (cardBack == null) {
+     print("Error loading cards. Make sure the card images are in the data folder.");
+  }
   for (String s : SUITS) {
     for (String r : RANKS) {
       cardImages.put(r + "_" + s, loadImage("cards/" + s + "/" + r + ".png"));
@@ -441,13 +444,16 @@ void drawInfoButton() {
 //info button click
 void infoButtonInteract() {
   if (mouseX > width*0.917 && mouseX < width*0.987 && mouseY > height*0.13 && mouseY < height*0.17) {
-    BTN_INFO = BTN_HOVER;
+    BTN_INFO = BTN_HOVER; //<>//
     if (mousePressed && !wasPressed) {
-      showFaqPage = true;
+      print("changing");
+      if (showFaqPage) showFaqPage = false;
+      else showFaqPage = true;
       wasPressed = true;
     }
   }
   else { BTN_INFO = #2C3E50; }
+  if (!mousePressed) wasPressed = false;
 }
 
 //info page
@@ -506,6 +512,7 @@ void drawInfo() {
   rect(int(width/2), int(height*0.92), int(width*0.15), int(height*0.068), int(width*0.0078));
   fill(0);
   noStroke();
+  textAlign(CENTER);
   text("Back", int(width/2), int(height*0.92));
 
   if (backHover && mousePressed && !wasPressed) {
