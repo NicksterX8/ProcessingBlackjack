@@ -11,6 +11,8 @@ color BTN_DOUBLE  = #F2975F;
 color BTN_SPLIT   = #1A5EA8;
 color BTN_JOIN   = #1A5EA8;
 color BTN_HOVER   = #b9b9b9;
+color BTN_ADDBOT = #2C3E50;
+color BTN_REMOVEBOT = #2C3E50;
 
 PFont f;
 
@@ -189,6 +191,12 @@ void drawButtons(boolean takingBets) {
     rect(int(width*0.65), int(height*0.95), int(width*0.07125), int(height*0.068), int(width*0.0078));
     fill(0);
     text("Confirm bet", int(width*0.65), int(height*0.95));
+
+    if(firstRound){
+      drawAddBotButton();
+      drawRemoveBotButton();
+    }
+    
     return;
   }
   
@@ -228,6 +236,8 @@ void drawButtons(boolean takingBets) {
   text("Dealer", int(width/2), int(height*0.12));
   
 }
+
+
 
 void drawPlayerHand(int playerIndex, float x, float y, float w, float h) {
   int activePlayer = game.currentRound.turn; //get the current player
@@ -439,6 +449,36 @@ void drawInfoButton() {
   fill(255);
   noStroke();
   text("Info", int(width*0.957), int(height*0.1));
+}
+
+void drawAddBotButton() {
+  rectMode(CENTER);
+  textAlign(CENTER, CENTER);
+  textSize(int(width/110));
+  stroke(0);
+  fill(BTN_ADDBOT);
+  rect(int(width*0.957), int(height*0.16), int(width*0.07), int(height*0.04), int(width*0.0078));
+  fill(255);
+  noStroke();
+  if(game.players.size() + numBots >= 4) {
+  
+    text("Match Full", int(width*0.957), int(height*0.16));
+  } 
+  else {
+    text("Add Bot", int(width*0.957), int(height*0.16));
+  }
+}
+void drawRemoveBotButton() {
+  rectMode(CENTER);
+  textAlign(CENTER, CENTER);
+  textSize(int(width/110));
+  stroke(0);
+  fill(BTN_REMOVEBOT);
+  // Positioned at 0.22 height (0.06 lower than Add Bot)
+  rect(int(width*0.957), int(height*0.22), int(width*0.07), int(height*0.04), int(width*0.0078));
+  fill(255);
+  noStroke();
+  text("Remove Bot", int(width*0.957), int(height*0.22));
 }
 
 //info button click

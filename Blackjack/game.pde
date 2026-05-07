@@ -22,6 +22,17 @@ class Game {
     String name = RandomBotNames[randomBotNameId] + " Bot";
     players.add(new Player(id, false, name));
   }
+
+  void removeBotPlayer() {
+    for (int i = players.size() - 1; i >= 0; i--) {
+      if (!players.get(i).human) {
+        players.remove(i);
+        println("Bot removed successfully.");
+        return;
+      }
+    }
+    println("No bots to remove.");
+  }
   
   
   void startGame() {
@@ -39,6 +50,14 @@ class Game {
   }
   
   boolean doHumanAction(PlayerActionType action) {
+    if(isConnected && !isHost){
+      if (myPlayerIndex == currentRound.turn) {
+        sendToServer(T_ACTION + S1 + action.name());
+      }
+      return false; // We didn't execute locally, so return false
+      
+    }
+    
     if (currentRound.turn >= currentRound.players.size()) {
        print("It's the dealer's turn!");
        return false; 

@@ -7,7 +7,8 @@ import processing.sound.*;
 
 Game game = new Game();
 CountDracula count = new CountDracula();
-int numBots = 3;
+int numBots = 0;
+int players = 0;
 
 SoundFile bgMusic;
 
@@ -48,6 +49,7 @@ final int GAME_SPEED = 20; // number of frames between actions like drawing card
 int timeRoundEnded = -10000;
 boolean takingBets = true;
 int playerBetTurn = 0;
+boolean firstRound = true;
 
 void startRound() {
 
@@ -62,6 +64,10 @@ void startRound() {
   playerBetTurn = 0;
   for (Player player : game.players) {
     player.currentBet = 0;
+  }
+
+  if(firstRound) {
+    firstRound = false;
   }
 }
 
@@ -82,7 +88,16 @@ void playerMakeBet() {
 }
 
 void draw() {
-  
+  networkManager();
+
+  if (!isHost && isConnected && (game.players == null || game.players.size() == 0)) {
+    background(0);
+    fill(255);
+    textAlign(CENTER, CENTER);
+    text("Syncing with Host...", width/2, height/2);
+    return; // Don't run the rest of draw until we have data
+  }
+
   background(255);
   if(!started) {
     drawStartInteract();
@@ -93,7 +108,60 @@ void draw() {
   drawTable(takingBets);
   
   
-  
+  if(firstRound){
+      // Add Bot button interaction (Matched to 0.957w, 0.16h center)
+    if (mouseX >= (int(width * 0.957) - int(width * 0.035)) && mouseX <= (int(width * 0.957) + int(width * 0.035))
+        && mouseY >= (int(height * 0.16) - int(height * 0.02)) && mouseY <= (int(height * 0.16) + int(height * 0.02))) {
+      
+      BTN_ADDBOT = BTN_HOVER;
+      
+      if (mousePressed && !wasPressed) {
+        if(game.players.size() >= 4) {
+          println("Cannot add more bots. Maximum of 4 total players.");
+          return;
+        }
+        numBots++;
+        game.addBotPlayer();
+        println("Bot added successfully.");
+        
+        wasPressed = true;
+      }
+      if (!mousePressed) wasPressed = false;
+      
+    } else {
+      BTN_ADDBOT = #2C3E50; // Default Blue color
+    }
+
+  // Remove Bot button interaction (0.957w, 0.22h center)
+  if (mouseX >= (int(width * 0.957) - int(width * 0.035)) && mouseX <= (int(width * 0.957) + int(width * 0.035))
+       && mouseY >= (int(height * 0.22) - int(height * 0.02)) && mouseY <= (int(height * 0.22) + int(height * 0.02))) {
+    
+    BTN_REMOVEBOT = BTN_HOVER;
+    
+    if (mousePressed && !wasPressed) {
+      // Logic to remove the last bot added
+      if (game.players.size() > 1) { // Ensure at least one player remains
+        for (int i = game.players.size() - 1; i >= 0; i--) {
+          if (!game.players.get(i).human) {
+            game.players.remove(i);
+            println("Bot removed.");
+            numBots--;
+            break; 
+          }
+        }
+      }
+      
+      wasPressed = true;
+    }
+    if (!mousePressed) wasPressed = false;
+    
+  } else {
+    BTN_REMOVEBOT = #2C3E50; // Red color for removal
+  }
+
+
+
+  }  
   Hand activeHand = getActiveHand();
   Player activePlayer = game.currentRound.activePlayer();
   if (game.currentRound.active) {
@@ -242,7 +310,11 @@ void draw() {
    if (takingBets && !showFaqPage) {
      textSize(30);
      textAlign(CENTER);
-     text("How many chips do you want to bet this round?", width/2, 100);
+     if(firstRound){
+        text("Place your bets! (You can add and remove bots with the buttons on the top right)\nMake SURE all players join before beginning!", width/2, 100);
+     } else {
+        text("Place your bets for the next round!", width/2, 100);
+     }
    }
    
    if (game.frameNumber - timeRoundEnded < 120) {
@@ -321,6 +393,11 @@ void drawStartInteract(){
       } 
       else {
         //hostGame();
+        hostGame((int)Float.parseFloat(portInput));
+        started = true; 
+        wasPressed = true;
+        isConnected =true;
+        println("Hosting game on port: " + portInput);
       }
       wasPressed = true;
     }
@@ -343,8 +420,16 @@ void drawStartInteract(){
     if (mousePressed && !wasPressed) {
       if (joinInput.length() == 0 || ipInput.length() == 0) {
         println("Please enter IP and port.");
-      } else {
+      } 
+      else {
         //joinGame();
+        // --- CLIENT START LOGIC ---
+        joinGame(ipInput.trim(), int(joinInput.trim()));
+        started = true;
+        isConnected = true; 
+        isHost = false; // Explicitly set that this is NOT the host
+        println("Connecting to: " + ipInput + ":" + joinInput);
+        // We do NOT call gameInit() here; the host will send us the game state
       }
       wasPressed = true;
     }
@@ -451,6 +536,23 @@ void drawBoard() {
      }
    }
    drawDeckPile(int(width*0.7), int(height*0.27), cardW, cardH);
+}
+
+void networkManager(){
+  if(isConnected){
+    if(isHost){
+      pollServer();
+    
+      if(frameCount%10 == 0){
+        broadcastToClients(T_STATE + S1 + serializeState());
+        println(T_STATE + S1 + serializeState());
+      }
+    }
+    else{
+      print("Polling server for updates...");
+      pollClient();
+    }
+  }
 }
 
 void keyPressed() {
