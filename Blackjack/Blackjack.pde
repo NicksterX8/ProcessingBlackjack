@@ -10,6 +10,10 @@ CountDracula count = new CountDracula();
 int numBots = 0;
 int players = 0;
 boolean SEECOUNT = true;
+int roundNumber = 1;
+boolean ending = false;
+int selectedBotIndex = -1; 
+boolean botButtonPressed = false; // Flag to prevent multi-clicks
 
 SoundFile bgMusic;
 
@@ -52,12 +56,11 @@ boolean takingBets = true;
 int playerBetTurn = 0;
 boolean firstRound = true;
 boolean counterPlaced = false;
+Player counter = null;
 
 void startRound() {
 
   IntList bets = new IntList();
-
-
   //places the count Dracula in a bot
   if(firstRound && game.players.size() > 2){
     counterPlaced = false;
@@ -66,6 +69,7 @@ void startRound() {
         if (!game.players.get(randomPlayer).human) {
           game.players.get(randomPlayer).knowsCount = true;
           counterPlaced = true;
+          counter = game.players.get(randomPlayer);
           print("Count Dracula has been placed in a bot" + game.players.get(randomPlayer).name + "\n");
         }
     }
@@ -100,6 +104,13 @@ void endRound() {
    timeRoundEnded = game.frameNumber; 
    game.endRound();
    print("The round is over");
+
+  if(roundNumber >= 10){
+    ending = true;
+    calculateWin();
+    print("game ended");
+   }
+  roundNumber++;
 }
 
 void playerMakeBet() {
@@ -111,22 +122,32 @@ void playerMakeBet() {
     playerBetTurn = game.currentRound.turn;
 }
 
-void draw() {
-  networkManager();
+Player winner = null;
+void calculateWin(){
 
-  if (!isHost && isConnected && (game.players == null || game.players.size() == 0)) {
-    background(0);
-    fill(255);
-    textAlign(CENTER, CENTER);
-    text("Syncing with Host...", width/2, height/2);
-    return; // Don't run the rest of draw until we have data
-  }
+  int highestChipCount = 0;
+  for(int i = 0; i < game.players.size(); i++){
+    if(game.players.get(i).chips > highestChipCount){
+      winner = game.players.get(i);
+      highestChipCount = game.players.get(i).chips;
+    }
+  }  
+  
+}
+
+void draw() {
 
   background(255);
   if(!started) {
     drawStartInteract();
     if (showFaqPage) drawInfo();
     return;
+  }
+
+  if(ending){
+    drawEnd();
+    return;
+
   }
   
   drawTable(takingBets);
@@ -282,6 +303,32 @@ void draw() {
           if (!mousePressed) wasPressed = false;
         } else BTN_SPLIT = #1A5EA8;
       }
+
+
+      if (playerChosen && game.players.size() > 2) {
+        int i = 0;
+        for (int pIdx = 0; pIdx < game.players.size(); pIdx++) {
+          Player p = game.players.get(pIdx);
+          if (!p.human && i < 3) {
+            float x = width / 2, y = (height * 0.45) + (i * (height * 0.07));
+            float bw = width * 0.15, bh = height * 0.05;
+
+            if (mouseX >= x-bw/2 && mouseX <= x+bw/2 && mouseY >= y-bh/2 && mouseY <= y+bh/2) {
+              if (mousePressed && !wasPressed) {
+                selectedBotIndex = pIdx; 
+                wasPressed = true;
+                println("Choice: " + p.name);
+              }
+            }
+            if (!mousePressed) wasPressed = false;
+            i++;
+          }
+        }
+      }
+
+
+
+      
     }
   }
   
@@ -423,10 +470,8 @@ void drawStartInteract(){
       } 
       else {
         //hostGame();
-        hostGame((int)Float.parseFloat(portInput));
         started = true; 
         wasPressed = true;
-        isConnected =true;
         println("Hosting game on port: " + portInput);
       }
       wasPressed = true;
@@ -454,10 +499,6 @@ void drawStartInteract(){
       else {
         //joinGame();
         // --- CLIENT START LOGIC ---
-        joinGame(ipInput.trim(), int(joinInput.trim()));
-        started = true;
-        isConnected = true; 
-        isHost = false; // Explicitly set that this is NOT the host
         println("Connecting to: " + ipInput + ":" + joinInput);
         // We do NOT call gameInit() here; the host will send us the game state
       }
@@ -570,21 +611,6 @@ void drawBoard() {
    drawDeckPile(int(width*0.7), int(height*0.27), cardW, cardH);
 }
 
-void networkManager(){
-  if(isConnected){
-    if(isHost){
-      pollServer();
-    
-      if(frameCount%10 == 0){
-        broadcastToClients(T_STATE + S1 + serializeState());
-        println(T_STATE + S1 + serializeState());
-      }
-    }
-    else{
-      pollClient();
-    }
-  }
-}
 
 void keyPressed() {
   //host port button

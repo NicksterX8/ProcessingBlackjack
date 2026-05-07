@@ -34,6 +34,8 @@ boolean ipBoxActive = false;
 float rainbowHue = 0;
 int fontSize;
 boolean showFaqPage = false;
+boolean playerWon = false;
+boolean playerChosen = false;
 
 //list of suits, matches the folder names under cards/
 String[] SUITS = {"hearts", "diamonds", "clubs", "spades"};
@@ -65,6 +67,58 @@ void drawStart(){
   }
 
 }
+
+void drawEnd(){
+  background(FELT_DARK);
+  noStroke();
+  fill(FELT);
+  ellipse(width/2, height/2,int(width * 0.9),int(height * 0.8));
+  noFill();
+  strokeWeight(2);
+  stroke(#2E8B57, 80);
+  //inner ring
+  ellipse(width/2, height/2,int(width * 0.850),int(height * 0.72));
+  noStroke();
+  drawEndButtons();
+
+}
+
+void drawEndButtons(){
+  rectMode(CENTER);
+  textAlign(CENTER, CENTER);
+  
+  // title
+  fill(255, 255, 255);
+  textSize(int(width/40));
+
+  //rainbow title for fun
+  if(winner == game.players.get(0)){
+    colorMode(HSB, 360, 100, 100);
+    fill(rainbowHue, 100, 100);
+    text("YOU WIN!", int(width/2), int(height*0.35));
+    rainbowHue += 0.6;
+    if (rainbowHue >= 360) rainbowHue = 0;
+    colorMode(RGB, 255);
+    textSize(int(width/96));
+    return;
+  }
+
+  else{
+    text("YOU LOSE!", int(width/2), int(height*0.35));
+    fill(255);
+    if(counterPlaced){
+      text("THE COUNT DRACULA WAS: " + counter.name, int(width/2), int(height*0.40));
+    }
+
+  }
+
+
+    
+
+
+}
+
+
 void drawTable(boolean takingBets) {
   background(FELT_DARK);
   noStroke();
