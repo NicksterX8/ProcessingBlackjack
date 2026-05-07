@@ -50,7 +50,7 @@ void setup() {
  loadMusic();
 }
 
-final int GAME_SPEED = 20; // number of frames between actions like drawing cards. lower is faster 
+final int GAME_SPEED = 45; // number of frames between actions like drawing cards. lower is faster 
 int timeRoundEnded = -10000;
 boolean takingBets = true;
 int playerBetTurn = 0;
