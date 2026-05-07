@@ -9,6 +9,7 @@ Game game = new Game();
 CountDracula count = new CountDracula();
 int numBots = 0;
 int players = 0;
+boolean SEECOUNT = true;
 
 SoundFile bgMusic;
 
@@ -50,10 +51,33 @@ int timeRoundEnded = -10000;
 boolean takingBets = true;
 int playerBetTurn = 0;
 boolean firstRound = true;
+boolean counterPlaced = false;
 
 void startRound() {
 
   IntList bets = new IntList();
+
+
+  //places the count Dracula in a bot
+  if(firstRound && game.players.size() > 2){
+    counterPlaced = false;
+    while(!counterPlaced){
+        int randomPlayer = int(random(0, game.players.size()));
+        if (!game.players.get(randomPlayer).human) {
+          game.players.get(randomPlayer).knowsCount = true;
+          counterPlaced = true;
+          print("Count Dracula has been placed in a bot" + game.players.get(randomPlayer).name + "\n");
+        }
+    }
+
+  }
+  
+  if(game.currentRound.deck.cards.size() < game.currentRound.deck.ogSize * 0.25) {
+     print("Shuffling new deck.\n");
+     game.currentRound.deck = createShuffledDeck(2); // create new deck with 6 duplicates of each card
+     count.resetCount();
+  }
+
   for (int i = 0; i < game.currentRound.players.size(); i++) {
     Player player = game.currentRound.players.get(i);
      bets.append(player.currentBet);
@@ -295,17 +319,23 @@ void draw() {
      }
    }
    
-   if (activePlayer != null && !activePlayer.human && takingBets) {
-       int highestPossibleBet = activePlayer.chips;
-       int botBet = 0;
-       if (highestPossibleBet <= 10) {
-         botBet = highestPossibleBet;
-       } else {
-         botBet = round(random(-0.499, 0.499 + highestPossibleBet / 10)) * 10;
-       }
-       activePlayer.currentBet = botBet;
-       playerMakeBet();
+  if (activePlayer != null && !activePlayer.human && takingBets) {
+    float tc = count.getTrueCount(game.currentRound.deck);
+    float aggression = activePlayer.botAggression;
+    int botBet;
+
+    if (activePlayer.knowsCount && tc > 1) {
+      float fraction = constrain(tc, 0, 10) / 20.0; // 0 to 0.5
+      botBet = int(activePlayer.chips * fraction * aggression);
+    } else {
+      botBet = int(activePlayer.chips * random(0.05, 0.2) * aggression);
     }
+
+    botBet = (botBet / 10) * 10;
+    botBet = constrain(botBet, 10, activePlayer.chips / 2);
+    activePlayer.currentBet = botBet;
+    playerMakeBet();
+  }
  
    if (takingBets && !showFaqPage) {
      textSize(30);
@@ -359,7 +389,7 @@ void draw() {
 
 
 void gameInit(){
-  String playerName = "Bob";
+  String playerName = "You";
   game.startGame();
   game.addHumanPlayer(playerName);
   for (int i = 0; i < numBots; i++) {
@@ -485,7 +515,9 @@ void drawBoard() {
   textAlign(CENTER, TOP);
   text("Round " + game.roundNumber, width/2, 50);
   textAlign(RIGHT, TOP);
-  text("True Count: " + count.getTrueCount(game.currentRound.deck), int(width-(width * 0.00961538461)), int(width*0.02604166666));
+  if(SEECOUNT) {
+    text("True Count: " + count.getTrueCount(game.currentRound.deck), int(width-(width * 0.00961538461)), int(width*0.02604166666));
+  }
   //player name and number of chips
   textAlign(LEFT, CENTER);
   int lineHeight = int(height * 0.03);
@@ -549,7 +581,6 @@ void networkManager(){
       }
     }
     else{
-      print("Polling server for updates...");
       pollClient();
     }
   }

@@ -22,27 +22,17 @@ class Game {
     String name = RandomBotNames[randomBotNameId] + " Bot";
     players.add(new Player(id, false, name));
   }
-
-  void removeBotPlayer() {
-    for (int i = players.size() - 1; i >= 0; i--) {
-      if (!players.get(i).human) {
-        players.remove(i);
-        println("Bot removed successfully.");
-        return;
-      }
-    }
-    println("No bots to remove.");
-  }
   
   
   void startGame() {
-     currentRound = new Round(players, 2);
+    currentRound = new Round(players, 2);
   }
   
   void startRound(IntList bets) {
     roundNumber++;
     print("Starting round #" + roundNumber + ".\n");
     currentRound.startRound(bets);
+    
   }
   
   void endRound() {
@@ -50,14 +40,6 @@ class Game {
   }
   
   boolean doHumanAction(PlayerActionType action) {
-    if(isConnected && !isHost){
-      if (myPlayerIndex == currentRound.turn) {
-        sendToServer(T_ACTION + S1 + action.name());
-      }
-      return false; // We didn't execute locally, so return false
-      
-    }
-    
     if (currentRound.turn >= currentRound.players.size()) {
        print("It's the dealer's turn!");
        return false; 
@@ -76,23 +58,55 @@ class Game {
     return result.success;
   }
   
+  
+
+
+
+
   // decide what the bot should do (hit/stand/split/double). This needs to be fleshed out way more (change depending on dealer's hand),
   // but this is just a very simple way of deciding for now.
-  PlayerActionType botDecideAction(Hand hand, Card dealerCard, int chipsLeft) {
-    // splitting logic
-    // always split with a pair of aces or 8s
-    if (chipsLeft >= hand.betChips) {
-      if (hand.isSplittable() && (hand.cards.get(0).rank == "8" || hand.cards.get(0).rank == "A")) {
-        return PlayerActionType.SPLIT;
-      }
-    }
-    if (hand.hardValue() >= 18) {
-      // always stand with a hard 18
-      return PlayerActionType.STAND;
-    } else {
-      return PlayerActionType.HIT;
-    }
+
+
+PlayerActionType botDecideAction(Hand hand, Card dealerCard, int chipsLeft) {
+  int val = hand.value();
+  Player activePlayer = currentRound.players.get(currentRound.turn);
+  if (val >= 21) return PlayerActionType.STAND;
+
+  float boldness = activePlayer.botBoldness;
+
+  // Dealer pressure
+  int dealerVal = HighRankValues.get(dealerCard.rank);
+  boldness += (6 - dealerVal) * 0.5;
+
+  if (activePlayer.knowsCount) {
+    float tc = count.getTrueCount(game.currentRound.deck);
+    boldness += tc * 0.8;
   }
+
+  //this variable is what dictates choices
+  float standThreshold = 15 + boldness;
+  
+  if (val < 18 && hand.value() != hand.hardValue()) {
+      return PlayerActionType.HIT;
+  }
+
+  if (val >= standThreshold) {
+    float r = random(1);
+    if (r < 0.08 && hand.isSplittable() && chipsLeft >= hand.betChips)
+      return PlayerActionType.SPLIT;
+    if (r < 0.12 && hand.isDoubleable() && chipsLeft >= hand.betChips)
+      return PlayerActionType.DOUBLE;
+    return PlayerActionType.STAND;
+  }
+
+  float r = random(1);
+  if (r < 0.10 && hand.isSplittable() && chipsLeft >= hand.betChips)
+    return PlayerActionType.SPLIT;
+  if (r < 0.15 && hand.isDoubleable() && chipsLeft >= hand.betChips)
+    return PlayerActionType.DOUBLE;
+  return PlayerActionType.HIT;
+  }
+
   
   boolean doBotAction() {
      Player activePlayer = currentRound.players.get(currentRound.turn);

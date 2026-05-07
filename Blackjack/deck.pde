@@ -86,6 +86,7 @@ int getHardHandValue(ArrayList<Card> hand) {
 class Deck {
   ArrayList<Card> cards = new ArrayList<Card>();
   
+  int ogSize = 0;
   // Randomly shuffle in place all cards in the deck
   void shuffle() {
      Collections.shuffle(cards);
@@ -94,7 +95,7 @@ class Deck {
   // Deck must not be empty!
   Card pop() {
      assert(cards.size() > 0);
-     return cards.remove(cards.size()-1); 
+     return cards.remove(cards.size()-1);
   }
   
   boolean isEmpty() {
@@ -123,5 +124,6 @@ Deck createSortedDeck(int numDuplicates) {
 Deck createShuffledDeck(int numDecksUsed) {
   Deck sorted = createSortedDeck(numDecksUsed);
   sorted.shuffle();
+  sorted.ogSize = sorted.cards.size();
   return sorted; // now shuffled
 }

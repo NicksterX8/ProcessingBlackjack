@@ -61,6 +61,10 @@ class Player {
   // round information, maybe should be stored in Round
   ArrayList<Hand> currentHands = new ArrayList<Hand>(); // needs to be an array of hands incase of splits
   
+  //bot settings
+  float botBoldness;// this is just a random number that makes the bot more or less likely to take risks during rounds
+  float botAggression; // this is just a random number that makes the bot more or less likely to bet higher during betting phase
+  boolean knowsCount;
   int currentBet = 0;
   
   Player(int playerID, boolean isHuman, String playerName) {
@@ -68,6 +72,9 @@ class Player {
     human = isHuman;
     name = playerName;
     chips = STARTING_CHIPS;
+    botBoldness = random(-3, 3); // this is just a random number that makes the bot more or less likely to take risks during rounds
+    botAggression = random(0.5, 2.5); // this is just a random number that makes the bot more or less likely to bet higher during betting phase
+    knowsCount = false;
   }
   
   boolean active() {
